@@ -1,212 +1,264 @@
 import React, { useState } from "react";
-import { PDFDocument } from "pdf-lib";
-import FileUploader from "../components/FileUploader";
-import { Download, Layers, PenTool, X, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  Minimize2,
+  Layers,
+  Split,
+  RotateCw,
+  Trash2,
+  FileOutput,
+  FolderOpen,
+  PenTool,
+  Eye,
+  Hash,
+  Crop,
+  EyeOff,
+  Droplet,
+  FolderEdit,
+  Share2,
+  FileType,
+  Edit3,
+  Lock,
+  Unlock,
+  Shield,
+  FileDown,
+  Camera,
+} from "lucide-react";
 
-const PdfEditor = () => {
-  const [files, setFiles] = useState([]);
-  const [mergedPdfUrl, setMergedPdfUrl] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState("merge"); // 'merge' | 'annotate'
-
-  const handleFilesSelected = (newFiles) => {
-    setFiles((prev) => [...prev, ...newFiles]);
-    setMergedPdfUrl(null); // Reset previous result
-  };
-
-  const removeFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const mergePdfs = async () => {
-    if (files.length < 2) return;
-    setIsProcessing(true);
-
-    try {
-      const mergedPdf = await PDFDocument.create();
-
-      for (const file of files) {
-        const fileBuffer = await file.arrayBuffer();
-        const pdf = await PDFDocument.load(fileBuffer);
-        const copiedPages = await mergedPdf.copyPages(
-          pdf,
-          pdf.getPageIndices()
-        );
-        copiedPages.forEach((page) => mergedPdf.addPage(page));
+const PdfToolCard = ({
+  title,
+  icon: Icon,
+  onClick,
+  color = "var(--primary-color)",
+}) => (
+  <div className="pdf-tool-card" onClick={onClick}>
+    <div
+      className="icon-box"
+      style={{ background: `${color}15`, border: `1px solid ${color}30` }}
+    >
+      <Icon size={24} color={color} />
+    </div>
+    <span className="tool-name">{title}</span>
+    <style>{`
+      .pdf-tool-card {
+        background: var(--surface-color);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .pdf-tool-card:hover {
+        transform: translateY(-4px);
+        background: var(--surface-color-hover);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
       }
 
-      const pdfBytes = await mergedPdf.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-      setMergedPdfUrl(url);
-    } catch (error) {
-      console.error("Error merging PDFs:", error);
-      alert("Failed to merge PDFs. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+      .pdf-tool-card .icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .pdf-tool-card .tool-name {
+        color: #fff;
+        font-size: 0.85rem;
+        text-align: center;
+        font-weight: 500;
+      }
+    `}</style>
+  </div>
+);
+
+const PdfEditor = () => {
+  const navigate = useNavigate();
+
+  const tools = [
+    // Compress
+    {
+      title: "Compress PDF",
+      icon: Minimize2,
+      path: "/pdf-editor/compress",
+      color: "#FF4081",
+    },
+
+    // Organize
+    {
+      title: "Merge PDF",
+      icon: Layers,
+      path: "/pdf-editor/merge",
+      color: "#9C27B0",
+    },
+    {
+      title: "Split PDF",
+      icon: Split,
+      path: "/pdf-editor/split",
+      color: "#9C27B0",
+    },
+    {
+      title: "Rotate PDF",
+      icon: RotateCw,
+      path: "/pdf-editor/rotate",
+      color: "#9C27B0",
+    },
+    {
+      title: "Delete Pages",
+      icon: Trash2,
+      path: "/pdf-editor/delete-pages",
+      color: "#9C27B0",
+    },
+    {
+      title: "Extract Pages",
+      icon: FileOutput,
+      path: "/pdf-editor/extract",
+      color: "#9C27B0",
+    },
+    {
+      title: "Organize PDF",
+      icon: FolderOpen,
+      path: "/pdf-editor/organize",
+      color: "#9C27B0",
+    },
+
+    // View & Edit
+    {
+      title: "Edit PDF",
+      icon: Edit3,
+      path: "/pdf-editor/edit",
+      color: "#00BCD4",
+    },
+    {
+      title: "PDF Annotator",
+      icon: PenTool,
+      path: "/pdf-editor/annotate",
+      color: "#00BCD4",
+    },
+    {
+      title: "PDF Reader",
+      icon: Eye,
+      path: "/pdf-editor/reader",
+      color: "#00BCD4",
+    },
+    {
+      title: "Number Pages",
+      icon: Hash,
+      path: "/pdf-editor/number-pages",
+      color: "#00BCD4",
+    },
+    {
+      title: "Crop PDF",
+      icon: Crop,
+      path: "/pdf-editor/crop",
+      color: "#00BCD4",
+    },
+    {
+      title: "Redact PDF",
+      icon: EyeOff,
+      path: "/pdf-editor/redact",
+      color: "#00BCD4",
+    },
+    {
+      title: "Watermark PDF",
+      icon: Droplet,
+      path: "/pdf-editor/watermark",
+      color: "#00BCD4",
+    },
+    {
+      title: "PDF Form Filler",
+      icon: FolderEdit,
+      path: "/pdf-editor/form-filler",
+      color: "#00BCD4",
+    },
+    {
+      title: "Share PDF",
+      icon: Share2,
+      path: "/pdf-editor/share",
+      color: "#00BCD4",
+    },
+
+    // Convert
+    {
+      title: "PDF Converter",
+      icon: FileType,
+      path: "/pdf-editor/converter",
+      color: "#FF9800",
+    },
+
+    // Sign
+    {
+      title: "Sign PDF",
+      icon: Edit3,
+      path: "/pdf-editor/sign",
+      color: "#E91E63",
+    },
+    {
+      title: "Unlock PDF",
+      icon: Unlock,
+      path: "/pdf-editor/unlock",
+      color: "#E91E63",
+    },
+    {
+      title: "Protect PDF",
+      icon: Shield,
+      path: "/pdf-editor/protect",
+      color: "#E91E63",
+    },
+    {
+      title: "Flatten PDF",
+      icon: FileDown,
+      path: "/pdf-editor/flatten",
+      color: "#E91E63",
+    },
+
+    // Scan
+    {
+      title: "PDF Scanner",
+      icon: Camera,
+      path: "/pdf-editor/scanner",
+      color: "#3F51B5",
+    },
+  ];
 
   return (
     <div className="page-container">
-      <header style={{ marginBottom: "20px" }}>
-        <h2 className="neon-text">PDF Editor</h2>
+      <header style={{ marginBottom: "30px", textAlign: "center" }}>
+        <h2 className="neon-text">PDF Tools</h2>
+        <p style={{ color: "#888" }}>Choose a tool to get started</p>
       </header>
 
-      <div className="tabs">
-        <button
-          className={`tab-btn ${activeTab === "merge" ? "active" : ""}`}
-          onClick={() => setActiveTab("merge")}
-        >
-          <Layers size={18} /> Merge
-        </button>
-        <button
-          className={`tab-btn ${activeTab === "annotate" ? "active" : ""}`}
-          onClick={() => setActiveTab("annotate")}
-        >
-          <PenTool size={18} /> Annotate
-        </button>
-      </div>
-
-      <div className="content-area">
-        {activeTab === "merge" && (
-          <div className="merge-section">
-            <FileUploader
-              onFilesSelected={handleFilesSelected}
-              accept={{ "application/pdf": [".pdf"] }}
-              multiple={true}
-              label="Drop PDF files here to merge"
-            />
-
-            {files.length > 0 && (
-              <div className="file-list">
-                {files.map((file, index) => (
-                  <div key={index} className="file-item">
-                    <FileText size={20} className="file-icon" />
-                    <span className="file-name">{file.name}</span>
-                    <button
-                      onClick={() => removeFile(index)}
-                      className="remove-btn"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {files.length >= 2 && (
-              <button
-                className="btn-neon"
-                onClick={mergePdfs}
-                disabled={isProcessing}
-                style={{ width: "100%", marginTop: "20px" }}
-              >
-                {isProcessing ? "Merging..." : "Merge PDFs"}
-              </button>
-            )}
-
-            {mergedPdfUrl && (
-              <div className="result-section">
-                <h3 style={{ color: "#00FFC8" }}>Success!</h3>
-                <a
-                  href={mergedPdfUrl}
-                  download="merged-document.pdf"
-                  className="btn-neon"
-                >
-                  <Download size={18} style={{ marginRight: "8px" }} /> Download
-                  Merged PDF
-                </a>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "annotate" && (
-          <div className="annotate-section">
-            <p
-              style={{ color: "#888", textAlign: "center", marginTop: "40px" }}
-            >
-              Annotation tools coming soon!
-            </p>
-          </div>
-        )}
+      <div className="pdf-tools-grid">
+        {tools.map((tool, idx) => (
+          <PdfToolCard
+            key={idx}
+            title={tool.title}
+            icon={tool.icon}
+            color={tool.color}
+            onClick={() => navigate(tool.path)}
+          />
+        ))}
       </div>
 
       <style>{`
-        .tabs {
-          display: flex;
-          gap: 10px;
-          margin-bottom: 20px;
+        .pdf-tools-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+          gap: 16px;
+          max-width: 1000px;
+          margin: 0 auto;
         }
 
-        .tab-btn {
-          background: transparent;
-          border: 1px solid #333;
-          color: #888;
-          padding: 10px 20px;
-          border-radius: 8px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          transition: all 0.3s ease;
-        }
-
-        .tab-btn.active {
-          background: rgba(64, 224, 208, 0.1);
-          border-color: var(--primary-color);
-          color: var(--primary-color);
-        }
-
-        .file-list {
-          margin-top: 20px;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        .file-item {
-          background: var(--surface-color);
-          padding: 12px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          border: 1px solid #333;
-        }
-
-        .file-icon {
-          color: var(--primary-color);
-          margin-right: 12px;
-        }
-
-        .file-name {
-          flex: 1;
-          font-size: 0.9rem;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .remove-btn {
-          background: transparent;
-          border: none;
-          color: #666;
-          cursor: pointer;
-          padding: 4px;
-        }
-
-        .remove-btn:hover {
-          color: var(--danger-color);
-        }
-
-        .result-section {
-          margin-top: 30px;
-          text-align: center;
-          padding: 20px;
-          background: rgba(0, 255, 200, 0.05);
-          border-radius: 12px;
-          border: 1px dashed var(--accent-color);
+        @media (max-width: 640px) {
+          .pdf-tools-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
       `}</style>
     </div>
