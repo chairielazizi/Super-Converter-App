@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Super Converter</string>
+    <string name="title_activity_main">Super Converter</string>
+    <string name="package_name">com.superconverter.app</string>
+    <string name="custom_url_scheme">com.superconverter.app</string>
+</resources>

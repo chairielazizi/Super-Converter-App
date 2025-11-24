@@ -1,0 +1,122 @@
+:root {
+  --bg-color: #121212;
+  --surface-color: #1e1e1e;
+  --surface-color-hover: #2a2a2a;
+  --primary-color: #40e0d0; /* Turquoise */
+  --accent-color: #00ffc8; /* Neon Cyan */
+  --text-color: #e0e0e0;
+  --text-muted: #a0a0a0;
+  --danger-color: #ff4081;
+
+  --neon-glow: 0 0 10px rgba(64, 224, 208, 0.5),
+    0 0 20px rgba(64, 224, 208, 0.3);
+  --neon-border: 1px solid rgba(64, 224, 208, 0.3);
+
+  --font-family: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
+}
+
+/* Utilities */
+.neon-text {
+  color: var(--primary-color);
+  text-shadow: 0 0 5px rgba(64, 224, 208, 0.5);
+}
+
+.neon-box {
+  background: var(--surface-color);
+  border: var(--neon-border);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.neon-box:hover {
+  box-shadow: var(--neon-glow);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.btn-neon {
+  background: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-neon:hover {
+  background: var(--primary-color);
+  color: #121212;
+  box-shadow: 0 0 20px rgba(64, 224, 208, 0.6);
+}
+
+.btn-neon:active {
+  transform: scale(0.98);
+}
+
+.page-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 80px; /* Space for bottom nav */
+}
+
+h1,
+h2,
+h3 {
+  color: #fff;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  background: var(--surface-color);
+  border: 1px solid #333;
+  color: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 5px rgba(64, 224, 208, 0.3);
+}
