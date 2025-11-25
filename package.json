@@ -12,6 +12,7 @@
   "dependencies": {
     "@capacitor/android": "^7.4.4",
     "@capacitor/core": "^7.4.4",
+    "@capacitor/filesystem": "^7.1.4",
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.554.0",
     "pdf-lib": "^1.17.1",

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import FileUploader from "../../components/FileUploader";
-import { Download, ArrowLeft } from "lucide-react";
+import { Download, ArrowLeft, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { downloadPdf } from "../../utils/downloadHelper";
+import { Capacitor } from "@capacitor/core";
 
 const SplitPdf = () => {
   const navigate = useNavigate();
@@ -25,15 +27,23 @@ const SplitPdf = () => {
       const pdfDoc = await PDFDocument.load(fileBuffer);
       const pageCount = pdfDoc.getPageCount();
       const pages = [];
+      const isNative = Capacitor.isNativePlatform();
 
       for (let i = 0; i < pageCount; i++) {
         const newPdf = await PDFDocument.create();
         const [copiedPage] = await newPdf.copyPages(pdfDoc, [i]);
         newPdf.addPage(copiedPage);
         const pdfBytes = await newPdf.save();
-        const blob = new Blob([pdfBytes], { type: "application/pdf" });
-        const url = URL.createObjectURL(blob);
-        pages.push({ pageNum: i + 1, url });
+
+        let pageData = { pageNum: i + 1, pdfBytes };
+
+        // For browser, pre-generate Blob URL to allow direct <a> links
+        if (!isNative) {
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
+          pageData.url = URL.createObjectURL(blob);
+        }
+
+        pages.push(pageData);
       }
 
       setSplitPages(pages);
@@ -88,21 +98,77 @@ const SplitPdf = () => {
 
             {splitPages.length > 0 && (
               <div className="pages-grid">
-                <h3 style={{ color: "#fff", marginBottom: "16px" }}>
-                  {splitPages.length} Pages Extracted
-                </h3>
-                {splitPages.map((page) => (
-                  <div key={page.pageNum} className="page-card">
-                    <span>Page {page.pageNum}</span>
-                    <a
-                      href={page.url}
-                      download={`page-${page.pageNum}.pdf`}
-                      className="btn-neon"
-                    >
-                      <Download size={16} /> Download
-                    </a>
+                <div className="success-header">
+                  <div className="success-icon-wrapper small">
+                    <div className="success-icon-ring"></div>
+                    <Download size={24} className="success-icon" />
                   </div>
-                ))}
+                  <h3 style={{ color: "#fff", marginBottom: "8px" }}>
+                    {splitPages.length} Pages Extracted
+                  </h3>
+                  <p style={{ color: "#888", fontSize: "0.9rem" }}>
+                    Download individual pages below
+                  </p>
+                </div>
+
+                <div className="cards-container">
+                  {splitPages.map((page) => (
+                    <div key={page.pageNum} className="page-card">
+                      <div className="page-info">
+                        <div className="page-icon">
+                          <span className="page-number">{page.pageNum}</span>
+                        </div>
+                        <span className="page-label">Page {page.pageNum}</span>
+                      </div>
+
+                      {page.url ? (
+                        /* Browser: Programmatic Link Trigger */
+                        <button
+                          className="btn-download-card"
+                          onClick={() => {
+                            const link = document.createElement("a");
+                            link.href = page.url;
+                            link.download = `page-${page.pageNum}.pdf`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                        >
+                          <Download size={14} /> Download
+                        </button>
+                      ) : (
+                        /* Mobile: Button triggering Filesystem write */
+                        <button
+                          className="btn-download-card"
+                          onClick={async () => {
+                            const result = await downloadPdf(
+                              page.pdfBytes,
+                              `page-${page.pageNum}.pdf`
+                            );
+                            if (result.success) {
+                              alert(`✅ ${result.message}`);
+                            } else {
+                              alert(`❌ ${result.message}`);
+                            }
+                          }}
+                        >
+                          <Download size={14} /> Download
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  className="btn-secondary"
+                  onClick={() => {
+                    setFile(null);
+                    setSplitPages([]);
+                  }}
+                  style={{ marginTop: "30px", width: "100%" }}
+                >
+                  Split Another PDF
+                </button>
               </div>
             )}
           </>
@@ -124,7 +190,7 @@ const SplitPdf = () => {
         }
 
         .tool-content {
-          max-width: 600px;
+          max-width: 800px;
           margin: 0 auto;
         }
 
@@ -146,26 +212,136 @@ const SplitPdf = () => {
         }
 
         .pages-grid {
-          margin-top: 20px;
+          margin-top: 30px;
+        }
+        
+        .success-header {
+          text-align: center;
+          margin-bottom: 30px;
+          padding: 20px;
+          background: linear-gradient(145deg, rgba(0, 255, 200, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
+          border-radius: 12px;
+          border: 1px solid rgba(0, 255, 200, 0.1);
+        }
+        
+        .success-icon-wrapper.small {
+          position: relative;
+          width: 50px;
+          height: 50px;
+          margin: 0 auto 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .success-icon-ring {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          border: 2px solid var(--accent-color);
+          opacity: 0.5;
+          animation: pulse-ring 2s infinite;
+        }
+
+        .success-icon {
+          color: var(--accent-color);
+          z-index: 2;
+        }
+        
+        @keyframes pulse-ring {
+          0% { transform: scale(0.8); opacity: 0.8; }
+          100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .cards-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 16px;
         }
 
         .page-card {
-          background: var(--surface-color);
-          padding: 12px 16px;
-          border-radius: 8px;
-          border: 1px solid #333;
-          margin-bottom: 10px;
+          background: rgba(255, 255, 255, 0.03);
+          padding: 16px;
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
           display: flex;
-          justify-content: space-between;
+          flex-direction: column;
           align-items: center;
+          gap: 16px;
+          transition: all 0.3s ease;
+        }
+        
+        .page-card:hover {
+          transform: translateY(-2px);
+          border-color: var(--accent-color);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .page-info {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .page-icon {
+          width: 40px;
+          height: 50px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .page-number {
+          font-weight: bold;
+          color: #fff;
+        }
+        
+        .page-label {
+          color: #ccc;
+          font-size: 0.9rem;
         }
 
-        .page-card .btn-neon {
+        .btn-download-card {
+          background: var(--accent-color);
+          color: #000;
+          border: none;
           padding: 8px 16px;
+          border-radius: 6px;
           font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
           display: flex;
           align-items: center;
           gap: 6px;
+          width: 100%;
+          justify-content: center;
+          transition: all 0.2s ease;
+        }
+        
+        .btn-download-card:hover {
+          background: #00ffc8;
+          transform: scale(1.02);
+        }
+        
+        .btn-secondary {
+          background: transparent;
+          border: 1px solid #444;
+          color: #888;
+          padding: 12px;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+          border-color: #666;
+          color: #fff;
+          background: rgba(255, 255, 255, 0.05);
         }
       `}</style>
     </div>
