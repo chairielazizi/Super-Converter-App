@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
+import { getTimestampedFilename } from "../../utils/fileUtils";
 
 const OrganizePdf = () => {
   const navigate = useNavigate();
@@ -108,7 +109,10 @@ const OrganizePdf = () => {
       const pdfBytes = await newPdfDoc.save();
 
       // Download the result
-      const result = await downloadPdf(pdfBytes, "organized.pdf");
+      const result = await downloadPdf(
+        pdfBytes,
+        getTimestampedFilename("organized")
+      );
       setDownloadResult(result);
     } catch (error) {
       console.error("Error organizing PDF:", error);
@@ -255,11 +259,12 @@ const OrganizePdf = () => {
                     <a
                       className="btn-download-primary"
                       href={downloadResult.uri}
+                      download={downloadResult.filename}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <Download size={18} />
-                      <span>Open PDF</span>
+                      <span>Download PDF</span>
                     </a>
                   ) : (
                     <p
@@ -274,9 +279,7 @@ const OrganizePdf = () => {
                   )}
 
                   <p className="download-hint">
-                    {downloadResult?.isBrowser
-                      ? "Click to open PDF in new tab"
-                      : "Check your Files app"}
+                    {downloadResult?.isBrowser ? "" : "Check your Files app"}
                   </p>
                 </div>
 

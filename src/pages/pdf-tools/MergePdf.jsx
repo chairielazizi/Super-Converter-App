@@ -4,6 +4,7 @@ import FileUploader from "../../components/FileUploader";
 import { Download, X, FileText, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
+import { getTimestampedFilename } from "../../utils/fileUtils";
 
 const MergePdf = () => {
   const navigate = useNavigate();
@@ -43,7 +44,10 @@ const MergePdf = () => {
       const pdfBytes = await mergedPdf.save();
 
       // Use the cross-platform download helper
-      const result = await downloadPdf(pdfBytes, "merged-document.pdf");
+      const result = await downloadPdf(
+        pdfBytes,
+        getTimestampedFilename("merged-document")
+      );
       setDownloadResult(result);
       setMergedPdfUrl("completed"); // Just a flag to show success UI
     } catch (error) {
@@ -125,11 +129,12 @@ const MergePdf = () => {
                 <a
                   className="btn-download-primary"
                   href={downloadResult.uri}
+                  download={downloadResult.filename}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <Download size={18} />
-                  <span>Open PDF</span>
+                  <span>Download PDF</span>
                 </a>
               ) : (
                 <p
@@ -144,9 +149,7 @@ const MergePdf = () => {
               )}
 
               <p className="download-hint">
-                {downloadResult?.isBrowser
-                  ? "Click to open PDF in new tab"
-                  : "Check your Files app"}
+                {downloadResult?.isBrowser ? "" : "Check your Files app"}
               </p>
             </div>
 
@@ -188,8 +191,6 @@ const MergePdf = () => {
         }
 
         .tool-content {
-          max-width: 600px;
-          margin: 0 auto;
         }
 
         .file-list {

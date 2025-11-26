@@ -4,6 +4,7 @@ import FileUploader from "../../components/FileUploader";
 import { Download, ArrowLeft, FileText, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
+import { getTimestampedFilename } from "../../utils/fileUtils";
 
 const CompressPdf = () => {
   const navigate = useNavigate();
@@ -37,7 +38,10 @@ const CompressPdf = () => {
       setCompressedSize(pdfBytes.length);
 
       // Automatically trigger download logic
-      const result = await downloadPdf(pdfBytes, "compressed.pdf");
+      const result = await downloadPdf(
+        pdfBytes,
+        getTimestampedFilename("compressed")
+      );
       setDownloadResult(result);
       setCompressedPdfUrl("completed");
     } catch (error) {
@@ -159,11 +163,12 @@ const CompressPdf = () => {
                     <a
                       className="btn-download-primary"
                       href={downloadResult.uri}
+                      download={downloadResult.filename}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <Download size={18} />
-                      <span>Open PDF</span>
+                      <span>Download PDF</span>
                     </a>
                   ) : (
                     <p
@@ -178,9 +183,7 @@ const CompressPdf = () => {
                   )}
 
                   <p className="download-hint">
-                    {downloadResult?.isBrowser
-                      ? "Click to open PDF in new tab"
-                      : "Check your Files app"}
+                    {downloadResult?.isBrowser ? "" : "Check your Files app"}
                   </p>
                 </div>
 

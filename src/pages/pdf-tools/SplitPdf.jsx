@@ -5,6 +5,7 @@ import { Download, ArrowLeft, FileText, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
 import { Capacitor } from "@capacitor/core";
+import { getTimestampedFilename } from "../../utils/fileUtils";
 
 const SplitPdf = () => {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ const SplitPdf = () => {
         if (!isNative) {
           const blob = new Blob([pdfBytes], { type: "application/pdf" });
           pageData.url = URL.createObjectURL(blob);
+          pageData.filename = getTimestampedFilename(`page_${i + 1}`);
         }
 
         pages.push(pageData);
@@ -131,6 +133,7 @@ const SplitPdf = () => {
                         <a
                           className="btn-download-card"
                           href={page.url}
+                          download={page.filename}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -143,7 +146,7 @@ const SplitPdf = () => {
                           onClick={async () => {
                             const result = await downloadPdf(
                               page.pdfBytes,
-                              `page-${page.pageNum}.pdf`
+                              getTimestampedFilename(`page_${page.pageNum}`)
                             );
                             if (result.success) {
                               alert(`✅ ${result.message}`);
@@ -190,8 +193,6 @@ const SplitPdf = () => {
         }
 
         .tool-content {
-          max-width: 800px;
-          margin: 0 auto;
         }
 
         .file-info {
