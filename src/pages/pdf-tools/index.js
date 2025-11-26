@@ -6,11 +6,11 @@ export { default as RotatePdf } from "./RotatePdf";
 export { default as DeletePdf } from "./DeletePdf";
 export { default as ExtractPdf } from "./ExtractPdf";
 export { default as OrganizePdf } from "./OrganizePdf";
+export { default as PdfReader } from "./PdfReader";
 
 // Placeholder Tools (Coming Soon)
 export {
   PdfAnnotator,
-  PdfReader,
   NumberPages,
   CropPdf,
   RedactPdf,
