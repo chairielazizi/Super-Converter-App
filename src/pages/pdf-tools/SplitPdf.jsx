@@ -107,7 +107,7 @@ const SplitPdf = () => {
                     {splitPages.length} Pages Extracted
                   </h3>
                   <p style={{ color: "#888", fontSize: "0.9rem" }}>
-                    Download individual pages below
+                    Click "Download" to open each PDF in new tab
                   </p>
                 </div>
 
@@ -122,20 +122,15 @@ const SplitPdf = () => {
                       </div>
 
                       {page.url ? (
-                        /* Browser: Programmatic Link Trigger */
-                        <button
+                        /* Browser: Direct Link */
+                        <a
                           className="btn-download-card"
-                          onClick={() => {
-                            const link = document.createElement("a");
-                            link.href = page.url;
-                            link.download = `page-${page.pageNum}.pdf`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                          }}
+                          href={page.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
                           <Download size={14} /> Download
-                        </button>
+                        </a>
                       ) : (
                         /* Mobile: Button triggering Filesystem write */
                         <button
@@ -321,6 +316,7 @@ const SplitPdf = () => {
           width: 100%;
           justify-content: center;
           transition: all 0.2s ease;
+          text-decoration: none;
         }
         
         .btn-download-card:hover {

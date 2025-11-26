@@ -139,43 +139,45 @@ const CompressPdf = () => {
                   </div>
                 </div>
 
-                {downloadResult?.isBrowser ? (
-                  <div className="download-action-area">
-                    <div className="file-preview-card">
-                      <FileText
-                        size={24}
-                        style={{ color: "var(--accent-color)" }}
-                      />
-                      <span className="file-name-display">
-                        {downloadResult.filename}
-                      </span>
-                    </div>
+                <div className="download-action-area">
+                  <div className="file-preview-card">
+                    <FileText
+                      size={24}
+                      style={{ color: "var(--accent-color)" }}
+                    />
+                    <span className="file-name-display">
+                      {downloadResult?.filename || "compressed.pdf"}
+                    </span>
+                  </div>
 
-                    <button
+                  {downloadResult?.isBrowser ? (
+                    <a
                       className="btn-download-primary"
-                      onClick={() => {
-                        // Programmatic download to ensure filename is respected
-                        const link = document.createElement("a");
-                        link.href = downloadResult.uri;
-                        link.download = downloadResult.filename;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                      href={downloadResult.uri}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Download size={18} />
+                      <span>Open PDF</span>
+                    </a>
+                  ) : (
+                    <p
+                      style={{
+                        marginTop: "15px",
+                        color: "#00FFC8",
+                        textAlign: "center",
                       }}
                     >
-                      <Download size={20} />
-                      Download Compressed PDF
-                    </button>
-
-                    <p className="download-hint">
-                      Clicking will save the file to your device
+                      ✅ PDF saved to your device!
                     </p>
-                  </div>
-                ) : (
-                  <p style={{ marginTop: "15px", color: "#00FFC8" }}>
-                    {downloadResult?.message || "PDF saved to your device!"}
+                  )}
+
+                  <p className="download-hint">
+                    {downloadResult?.isBrowser
+                      ? "Click to open PDF in new tab"
+                      : "Check your Files app"}
                   </p>
-                )}
+                </div>
 
                 <button
                   className="btn-secondary"
@@ -332,9 +334,9 @@ const CompressPdf = () => {
           background: var(--accent-color);
           color: #000;
           border: none;
-          padding: 14px 32px;
+          padding: 12px 1px;
           border-radius: 8px;
-          font-size: 1.1rem;
+          font-size: 0.95rem;
           font-weight: 600;
           cursor: pointer;
           display: flex;
@@ -342,8 +344,19 @@ const CompressPdf = () => {
           justify-content: center;
           gap: 10px;
           width: 100%;
+          max-width: 100%;
           transition: all 0.3s ease;
           box-shadow: 0 0 20px rgba(0, 255, 200, 0.3);
+          text-decoration: none;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+
+        .btn-download-primary span {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
+          flex-shrink: 1;
         }
 
         .btn-download-primary:hover {
