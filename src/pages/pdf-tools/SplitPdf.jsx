@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import FileUploader from "../../components/FileUploader";
-import { Download, ArrowLeft, FileText } from "lucide-react";
+import { Download, ArrowLeft, FileText, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
 import { Capacitor } from "@capacitor/core";
@@ -77,10 +77,15 @@ const SplitPdf = () => {
         ) : (
           <>
             <div className="file-info">
-              <p>
-                <strong>{file.name}</strong>
-              </p>
-              <button className="text-btn" onClick={() => setFile(null)}>
+              <div className="file-info-content">
+                <FileText size={24} style={{ color: "var(--accent-color)" }} />
+                <div className="file-details">
+                  <span className="file-label">Selected File:</span>
+                  <strong className="file-name-text">{file.name}</strong>
+                </div>
+              </div>
+              <button className="change-file-btn" onClick={() => setFile(null)}>
+                <RefreshCw size={16} />
                 Change File
               </button>
             </div>
@@ -190,20 +195,65 @@ const SplitPdf = () => {
         }
 
         .file-info {
-          text-align: center;
           padding: 20px;
           background: var(--surface-color);
           border-radius: 12px;
           border: 1px solid #333;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
         }
 
-        .text-btn {
+        .file-info-content {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .file-details {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          min-width: 0;
+        }
+
+        .file-label {
+          font-size: 0.75rem;
+          color: #888;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .file-name-text {
+          font-size: 0.95rem;
+          color: #fff;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .change-file-btn {
           background: transparent;
-          border: none;
+          border: 1px solid var(--primary-color);
           color: var(--primary-color);
-          margin-top: 8px;
+          padding: 8px 16px;
+          border-radius: 6px;
           cursor: pointer;
-          text-decoration: underline;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 0.85rem;
+          transition: all 0.3s ease;
+          white-space: nowrap;
+        }
+
+        .change-file-btn:hover {
+          background: rgba(64, 224, 208, 0.1);
+          border-color: var(--accent-color);
+          color: var(--accent-color);
         }
 
         .pages-grid {
