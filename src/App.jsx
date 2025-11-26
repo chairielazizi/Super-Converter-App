@@ -12,8 +12,8 @@ import {
   SplitPdf,
   CompressPdf,
   RotatePdf,
-  DeletePages,
-  ExtractPages,
+  DeletePdf,
+  ExtractPdf,
   OrganizePdf,
   PdfAnnotator,
   PdfReader,
@@ -45,8 +45,8 @@ function App() {
           <Route path="pdf-editor/split" element={<SplitPdf />} />
           <Route path="pdf-editor/compress" element={<CompressPdf />} />
           <Route path="pdf-editor/rotate" element={<RotatePdf />} />
-          <Route path="pdf-editor/delete-pages" element={<DeletePages />} />
-          <Route path="pdf-editor/extract" element={<ExtractPages />} />
+          <Route path="pdf-editor/delete-pages" element={<DeletePdf />} />
+          <Route path="pdf-editor/extract" element={<ExtractPdf />} />
           <Route path="pdf-editor/organize" element={<OrganizePdf />} />
           <Route path="pdf-editor/annotate" element={<PdfAnnotator />} />
           <Route path="pdf-editor/reader" element={<PdfReader />} />
