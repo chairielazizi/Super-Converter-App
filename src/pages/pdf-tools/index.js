@@ -7,14 +7,14 @@ export { default as DeletePdf } from "./DeletePdf";
 export { default as ExtractPdf } from "./ExtractPdf";
 export { default as OrganizePdf } from "./OrganizePdf";
 export { default as PdfReader } from "./PdfReader";
+export { default as NumberPages } from "./NumberPages";
+export { default as WatermarkPdf } from "./WatermarkPdf";
 
 // Placeholder Tools (Coming Soon)
 export {
   PdfAnnotator,
-  NumberPages,
   CropPdf,
   RedactPdf,
-  WatermarkPdf,
   PdfFormFiller,
   SharePdf,
   EditPdf,
