@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PDFDocument } from "pdf-lib";
 import FileUploader from "../../components/FileUploader";
-import { Download, X, FileText, ArrowLeft } from "lucide-react";
+import { Download, X, FileText, ArrowLeft, Eye, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
 import { getTimestampedFilename } from "../../utils/fileUtils";
@@ -9,15 +9,26 @@ import { getTimestampedFilename } from "../../utils/fileUtils";
 const MergePdf = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
-  const [mergedPdfUrl, setMergedPdfUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [pdfBytes, setPdfBytes] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [downloadResult, setDownloadResult] = useState(null);
 
   const handleFilesSelected = (newFiles) => {
     setFiles((prev) => [...prev, ...newFiles]);
-    setMergedPdfUrl(null);
+    setPreviewUrl(null);
+    setPdfBytes(null);
     setDownloadResult(null);
   };
+
+  // Cleanup preview URL
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const removeFile = (index) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
@@ -41,15 +52,13 @@ const MergePdf = () => {
         copiedPages.forEach((page) => mergedPdf.addPage(page));
       }
 
-      const pdfBytes = await mergedPdf.save();
+      const pdfBytesArray = await mergedPdf.save();
+      setPdfBytes(pdfBytesArray);
 
-      // Use the cross-platform download helper
-      const result = await downloadPdf(
-        pdfBytes,
-        getTimestampedFilename("merged-document")
-      );
-      setDownloadResult(result);
-      setMergedPdfUrl("completed"); // Just a flag to show success UI
+      // Create preview URL
+      const blob = new Blob([pdfBytesArray], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
     } catch (error) {
       console.error("Error merging PDFs:", error);
       alert("Failed to merge PDFs. Please try again.");
@@ -105,7 +114,55 @@ const MergePdf = () => {
           </button>
         )}
 
-        {mergedPdfUrl && (
+        {previewUrl && !downloadResult && (
+          <div className="preview-section">
+            <div className="preview-header">
+              <Eye size={20} style={{ color: "var(--accent-color)" }} />
+              <h3>Preview Merged PDF</h3>
+            </div>
+
+            <div className="pdf-viewer-container">
+              <iframe
+                src={previewUrl}
+                className="pdf-viewer"
+                title="PDF Preview"
+              />
+            </div>
+
+            <div className="preview-actions">
+              <button
+                className="btn-neon"
+                onClick={async () => {
+                  const result = await downloadPdf(
+                    pdfBytes,
+                    getTimestampedFilename("merged-document")
+                  );
+                  setDownloadResult(result);
+                }}
+                style={{ flex: 1 }}
+              >
+                <Download size={18} />
+                Download PDF
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                  }
+                  setPreviewUrl(null);
+                  setPdfBytes(null);
+                }}
+                style={{ flex: 1 }}
+              >
+                <RefreshCw size={18} />
+                Try Again
+              </button>
+            </div>
+          </div>
+        )}
+
+        {downloadResult && (
           <div className="result-section">
             <div className="success-icon-wrapper">
               <div className="success-icon-ring"></div>
@@ -159,8 +216,12 @@ const MergePdf = () => {
                 if (downloadResult?.uri && downloadResult?.isBrowser) {
                   URL.revokeObjectURL(downloadResult.uri);
                 }
+                if (previewUrl) {
+                  URL.revokeObjectURL(previewUrl);
+                }
                 setFiles([]);
-                setMergedPdfUrl(null);
+                setPreviewUrl(null);
+                setPdfBytes(null);
                 setDownloadResult(null);
               }}
             >
@@ -373,6 +434,69 @@ const MergePdf = () => {
           border-color: #666;
           color: #fff;
           background: rgba(255, 255, 255, 0.05);
+        }
+
+        .preview-section {
+          margin-top: 20px;
+        }
+
+        .preview-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          margin-bottom: 20px;
+          padding: 16px;
+          background: var(--surface-color);
+          border-radius: 12px;
+          border: 1px solid rgba(0, 255, 200, 0.2);
+        }
+
+        .preview-header h3 {
+          color: #fff;
+          margin: 0;
+          font-size: 1.1rem;
+        }
+
+        .pdf-viewer-container {
+          background: var(--surface-color);
+          border: 1px solid #333;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+          margin-bottom: 20px;
+        }
+
+        .pdf-viewer {
+          width: 100%;
+          height: calc(100vh - 450px);
+          min-height: 600px;
+          border: none;
+          background: #1a1a1a;
+        }
+
+        .preview-actions {
+          display: flex;
+          gap: 16px;
+        }
+
+        .preview-actions .btn-neon,
+        .preview-actions .btn-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+          .pdf-viewer {
+            height: calc(100vh - 500px);
+            min-height: 400px;
+          }
+
+          .preview-actions {
+            flex-direction: column;
+          }
         }
       `}</style>
     </div>

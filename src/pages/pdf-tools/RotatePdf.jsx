@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PDFDocument, degrees } from "pdf-lib";
 import FileUploader from "../../components/FileUploader";
 import {
@@ -7,6 +7,7 @@ import {
   RotateCw,
   FileText,
   RefreshCw,
+  Eye,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
@@ -16,16 +17,26 @@ const RotatePdf = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [rotation, setRotation] = useState(90);
-  const [rotatedPdfUrl, setRotatedPdfUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [pdfBytes, setPdfBytes] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [downloadResult, setDownloadResult] = useState(null);
 
   const handleFileSelected = (files) => {
     if (files.length === 0) return;
     setFile(files[0]);
-    setRotatedPdfUrl(null);
+    setPreviewUrl(null);
+    setPdfBytes(null);
     setDownloadResult(null);
   };
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const rotatePdf = async () => {
     if (!file) return;
@@ -41,15 +52,12 @@ const RotatePdf = () => {
         page.setRotation(degrees(rotation));
       });
 
-      const pdfBytes = await pdfDoc.save();
+      const pdfBytesArray = await pdfDoc.save();
+      setPdfBytes(pdfBytesArray);
 
-      // Automatically trigger download logic
-      const result = await downloadPdf(
-        pdfBytes,
-        getTimestampedFilename("rotated-document")
-      );
-      setDownloadResult(result);
-      setRotatedPdfUrl("completed");
+      const blob = new Blob([pdfBytesArray], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
     } catch (error) {
       console.error("Error rotating PDF:", error);
       alert("Failed to rotate PDF. Please try again.");
@@ -87,7 +95,7 @@ const RotatePdf = () => {
                   <strong className="file-name-text">{file.name}</strong>
                 </div>
               </div>
-              {!rotatedPdfUrl && (
+              {!previewUrl && !downloadResult && (
                 <button
                   className="change-file-btn"
                   onClick={() => setFile(null)}
@@ -97,8 +105,7 @@ const RotatePdf = () => {
                 </button>
               )}
             </div>
-
-            {!rotatedPdfUrl && (
+            {!previewUrl && !downloadResult && (
               <>
                 <div className="rotation-selector">
                   <label>Rotation Angle:</label>
@@ -127,8 +134,54 @@ const RotatePdf = () => {
                 </button>
               </>
             )}
+            {previewUrl && !downloadResult && (
+              <div className="preview-section">
+                <div className="preview-header">
+                  <Eye size={20} style={{ color: "var(--accent-color)" }} />
+                  <h3>Preview Rotated PDF</h3>
+                </div>
 
-            {rotatedPdfUrl && (
+                <div className="pdf-viewer-container">
+                  <iframe
+                    src={previewUrl}
+                    className="pdf-viewer"
+                    title="PDF Preview"
+                  />
+                </div>
+
+                <div className="preview-actions">
+                  <button
+                    className="btn-neon"
+                    onClick={async () => {
+                      const result = await downloadPdf(
+                        pdfBytes,
+                        getTimestampedFilename("rotated-document")
+                      );
+                      setDownloadResult(result);
+                    }}
+                    style={{ flex: 1 }}
+                  >
+                    <Download size={18} />
+                    Download PDF
+                  </button>
+                  <button
+                    className="btn-secondary"
+                    onClick={() => {
+                      if (previewUrl) {
+                        URL.revokeObjectURL(previewUrl);
+                      }
+                      setPreviewUrl(null);
+                      setPdfBytes(null);
+                    }}
+                    style={{ flex: 1 }}
+                  >
+                    <RefreshCw size={18} />
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            )}
+            {downloadResult && (
               <div className="result-section">
                 <div className="success-icon-wrapper">
                   <div className="success-icon-ring"></div>
@@ -185,8 +238,12 @@ const RotatePdf = () => {
                     if (downloadResult?.uri && downloadResult?.isBrowser) {
                       URL.revokeObjectURL(downloadResult.uri);
                     }
+                    if (previewUrl) {
+                      URL.revokeObjectURL(previewUrl);
+                    }
                     setFile(null);
-                    setRotatedPdfUrl(null);
+                    setPreviewUrl(null);
+                    setPdfBytes(null);
                     setDownloadResult(null);
                   }}
                 >
@@ -456,6 +513,69 @@ const RotatePdf = () => {
           border-color: #666;
           color: #fff;
           background: rgba(255, 255, 255, 0.05);
+        }
+
+        .preview-section {
+          margin-top: 20px;
+        }
+
+        .preview-header {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          margin-bottom: 20px;
+          padding: 16px;
+          background: var(--surface-color);
+          border-radius: 12px;
+          border: 1px solid rgba(0, 255, 200, 0.2);
+        }
+
+        .preview-header h3 {
+          color: #fff;
+          margin: 0;
+          font-size: 1.1rem;
+        }
+
+        .pdf-viewer-container {
+          background: var(--surface-color);
+          border: 1px solid #333;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+          margin-bottom: 20px;
+        }
+
+        .pdf-viewer {
+          width: 100%;
+          height: calc(100vh - 450px);
+          min-height: 600px;
+          border: none;
+          background: #1a1a1a;
+        }
+
+        .preview-actions {
+          display: flex;
+          gap: 16px;
+        }
+
+        .preview-actions .btn-neon,
+        .preview-actions .btn-secondary {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+          .pdf-viewer {
+            height: calc(100vh - 500px);
+            min-height: 400px;
+          }
+
+          .preview-actions {
+            flex-direction: column;
+          }
         }
       `}</style>
     </div>
