@@ -9,6 +9,9 @@ export { default as OrganizePdf } from "./OrganizePdf";
 export { default as PdfReader } from "./PdfReader";
 export { default as NumberPages } from "./NumberPages";
 export { default as WatermarkPdf } from "./WatermarkPdf";
+export { default as ProtectPdf } from "./ProtectPdf";
+export { default as UnlockPdf } from "./UnlockPdf";
+export { default as ImageToPdf } from "./ImageToPdf";
 
 // Placeholder Tools (Coming Soon)
 export {
@@ -20,8 +23,6 @@ export {
   EditPdf,
   PdfConverter,
   SignPdf,
-  UnlockPdf,
-  ProtectPdf,
   FlattenPdf,
   PdfScanner,
 } from "./PdfToolPlaceholders";

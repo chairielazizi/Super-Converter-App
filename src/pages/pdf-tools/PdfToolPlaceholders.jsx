@@ -136,22 +136,6 @@ export const SignPdf = () => (
   />
 );
 
-export const UnlockPdf = () => (
-  <PdfToolPlaceholder
-    title="Unlock PDF"
-    description="Remove password"
-    icon={Unlock}
-  />
-);
-
-export const ProtectPdf = () => (
-  <PdfToolPlaceholder
-    title="Protect PDF"
-    description="Add password protection"
-    icon={Shield}
-  />
-);
-
 export const FlattenPdf = () => (
   <PdfToolPlaceholder
     title="Flatten PDF"

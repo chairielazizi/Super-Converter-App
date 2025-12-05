@@ -30,6 +30,7 @@ import {
   ProtectPdf,
   FlattenPdf,
   PdfScanner,
+  ImageToPdf,
 } from "./pages/pdf-tools";
 
 function App() {
@@ -63,6 +64,7 @@ function App() {
           <Route path="pdf-editor/protect" element={<ProtectPdf />} />
           <Route path="pdf-editor/flatten" element={<FlattenPdf />} />
           <Route path="pdf-editor/scanner" element={<PdfScanner />} />
+          <Route path="pdf-editor/image-to-pdf" element={<ImageToPdf />} />
 
           <Route path="converter" element={<Converter />} />
           <Route path="video-downloader" element={<VideoDownloader />} />

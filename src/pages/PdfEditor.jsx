@@ -23,6 +23,7 @@ import {
   Shield,
   FileDown,
   Camera,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const PdfToolCard = ({
@@ -189,6 +190,12 @@ const PdfEditor = () => {
       title: "PDF Converter",
       icon: FileType,
       path: "/pdf-editor/converter",
+      color: "#FF9800",
+    },
+    {
+      title: "Image to PDF",
+      icon: ImageIcon,
+      path: "/pdf-editor/image-to-pdf",
       color: "#FF9800",
     },
 
