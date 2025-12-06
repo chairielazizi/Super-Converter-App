@@ -128,22 +128,6 @@ export const PdfConverter = () => (
   />
 );
 
-export const SignPdf = () => (
-  <PdfToolPlaceholder
-    title="Sign PDF"
-    description="Add digital signature"
-    icon={Edit3}
-  />
-);
-
-export const FlattenPdf = () => (
-  <PdfToolPlaceholder
-    title="Flatten PDF"
-    description="Flatten form fields"
-    icon={FileDown}
-  />
-);
-
 export const PdfScanner = () => (
   <PdfToolPlaceholder
     title="PDF Scanner"
