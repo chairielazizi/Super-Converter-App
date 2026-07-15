@@ -14,12 +14,12 @@ export { default as UnlockPdf } from "./UnlockPdf";
 export { default as ImageToPdf } from "./ImageToPdf";
 export { default as FlattenPdf } from "./FlattenPdf";
 export { default as SignPdf } from "./SignPdf";
+export { default as CropPdf } from "./CropPdf";
+export { default as RedactPdf } from "./RedactPdf";
 
 // Placeholder Tools (Coming Soon)
 export {
   PdfAnnotator,
-  CropPdf,
-  RedactPdf,
   PdfFormFiller,
   SharePdf,
   EditPdf,

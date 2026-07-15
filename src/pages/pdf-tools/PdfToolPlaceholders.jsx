@@ -71,22 +71,6 @@ export const NumberPages = () => (
   />
 );
 
-export const CropPdf = () => (
-  <PdfToolPlaceholder
-    title="Crop PDF"
-    description="Crop PDF pages"
-    icon={Crop}
-  />
-);
-
-export const RedactPdf = () => (
-  <PdfToolPlaceholder
-    title="Redact PDF"
-    description="Remove sensitive info"
-    icon={EyeOff}
-  />
-);
-
 export const WatermarkPdf = () => (
   <PdfToolPlaceholder
     title="Watermark PDF"

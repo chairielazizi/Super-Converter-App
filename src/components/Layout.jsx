@@ -1,13 +1,27 @@
 import React from "react";
-import { Outlet, NavLink } from "react-router-dom";
-import { Home, FileText, RefreshCw, Download } from "lucide-react";
+import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Home, FileText, RefreshCw, Download, ArrowLeft } from "lucide-react";
 
 const Layout = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHome = location.pathname === "/";
+
   return (
     <div
       style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
     >
-      <main style={{ flex: 1 }}>
+      {!isHome && (
+        <button
+          onClick={() => navigate("/")}
+          className="back-home-btn"
+          aria-label="Go to Home"
+        >
+          <ArrowLeft size={24} />
+        </button>
+      )}
+
+      <main style={{ flex: 1, paddingTop: !isHome ? "60px" : "0" }}>
         <Outlet />
       </main>
 
@@ -85,6 +99,32 @@ const Layout = () => {
 
         .nav-item span {
           margin-top: 4px;
+        }
+
+        .back-home-btn {
+          position: fixed;
+          top: 15px;
+          left: 15px;
+          background: rgba(30, 30, 30, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: white;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          z-index: 1000;
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+        }
+
+        .back-home-btn:hover {
+          background: rgba(60, 60, 60, 0.9);
+          border-color: var(--primary-color);
+          color: var(--primary-color);
+          transform: scale(1.05);
         }
       `}</style>
     </div>
