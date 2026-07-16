@@ -27,14 +27,17 @@ const CropPdf = () => {
   // PDF Dimensions from react-pdf
   const [pageDimensions, setPageDimensions] = useState({ width: 0, height: 0 });
 
-  // Crop Box in Percentage (0-100) relative to page size
-  // This makes it independent of display scale
-  const [cropBox, setCropBox] = useState({
-    x: 10,
-    y: 10,
-    width: 80,
-    height: 80,
+  // cropBoxes maps pageNumber -> { x, y, width, height }
+  const [cropBoxes, setCropBoxes] = useState({
+    1: { x: 10, y: 10, width: 80, height: 80 },
   });
+
+  // Helper to get crop box for current page
+  const getCurrentCropBox = () => {
+    if (cropBoxes[pageNumber]) return cropBoxes[pageNumber];
+    const baseBox = cropBoxes[1] || { x: 10, y: 10, width: 80, height: 80 };
+    return { x: 10, y: 10, width: baseBox.width, height: baseBox.height };
+  };
 
   // Dragging state
   const [isDragging, setIsDragging] = useState(false);
@@ -47,7 +50,8 @@ const CropPdf = () => {
     if (files.length > 0) {
       setFile(files[0]);
       setDownloadResult(null);
-      setCropBox({ x: 10, y: 10, width: 80, height: 80 });
+      setCropBoxes({ 1: { x: 10, y: 10, width: 80, height: 80 } });
+      setPageNumber(1);
     }
   };
 
@@ -61,29 +65,20 @@ const CropPdf = () => {
   };
 
   // Convert percentage to PDF points for inputs
-  const getMargins = () => {
+  const getMargins = (pageNum = pageNumber) => {
     const { width, height } = pageDimensions;
     if (!width || !height) return { top: 0, bottom: 0, left: 0, right: 0 };
 
-    // PDF coordinates: origin is usually bottom-left, but visual is top-left
-    // pdf-lib setCropBox(x, y, w, h) where x,y is bottom-left
+    let box = cropBoxes[pageNum];
+    if (!box) {
+      const baseBox = cropBoxes[1] || { x: 10, y: 10, width: 80, height: 80 };
+      box = { x: 10, y: 10, width: baseBox.width, height: baseBox.height };
+    }
 
-    // Visual (Top-Left origin):
-    // x = cropBox.x% * width
-    // y = cropBox.y% * height
-    // w = cropBox.width% * width
-    // h = cropBox.height% * height
-
-    // Margins:
-    // Left = x
-    // Right = width - (x + w)
-    // Top = y
-    // Bottom = height - (y + h)
-
-    const x = (cropBox.x / 100) * width;
-    const y = (cropBox.y / 100) * height;
-    const w = (cropBox.width / 100) * width;
-    const h = (cropBox.height / 100) * height;
+    const x = (box.x / 100) * width;
+    const y = (box.y / 100) * height;
+    const w = (box.width / 100) * width;
+    const h = (box.height / 100) * height;
 
     return {
       left: Math.round(x),
@@ -99,25 +94,34 @@ const CropPdf = () => {
     const { width, height } = pageDimensions;
     if (!width || !height) return;
 
-    const current = getMargins();
+    const current = getMargins(pageNumber);
     const newMargins = { ...current, [name]: val };
-
-    // Convert back to percentage box
-    // x = left
-    // w = width - left - right
-    // y = top
-    // h = height - top - bottom
 
     const newX = (newMargins.left / width) * 100;
     const newW = ((width - newMargins.left - newMargins.right) / width) * 100;
     const newY = (newMargins.top / height) * 100;
     const newH = ((height - newMargins.top - newMargins.bottom) / height) * 100;
 
-    setCropBox({
-      x: Math.max(0, newX),
-      y: Math.max(0, newY),
-      width: Math.max(5, newW), // Min 5%
-      height: Math.max(5, newH), // Min 5%
+    const finalW = Math.max(5, newW);
+    const finalH = Math.max(5, newH);
+
+    setCropBoxes((prev) => {
+      const newBoxes = { ...prev };
+      Object.keys(newBoxes).forEach((key) => {
+        newBoxes[key] = {
+          ...newBoxes[key],
+          width: finalW,
+          height: finalH,
+        };
+      });
+      newBoxes[pageNumber] = {
+        ...(newBoxes[pageNumber] || { x: 10, y: 10 }),
+        x: Math.max(0, newX),
+        y: Math.max(0, newY),
+        width: finalW,
+        height: finalH,
+      };
+      return newBoxes;
     });
   };
 
@@ -138,8 +142,11 @@ const CropPdf = () => {
 
     setDragStart({ x: e.clientX, y: e.clientY });
 
-    setCropBox((prev) => {
-      let { x, y, width, height } = prev;
+    setCropBoxes((prev) => {
+      const baseBox = prev[pageNumber] || { ...(prev[1] || { x: 10, y: 10, width: 80, height: 80 }), x: 10, y: 10 };
+      let { x, y, width, height } = baseBox;
+
+      let sizeChanged = false;
 
       if (dragAction === "move") {
         x = Math.max(0, Math.min(100 - width, x + deltaX));
@@ -147,6 +154,7 @@ const CropPdf = () => {
       } else if (dragAction === "resize-se") {
         width = Math.max(5, Math.min(100 - x, width + deltaX));
         height = Math.max(5, Math.min(100 - y, height + deltaY));
+        sizeChanged = true;
       } else if (dragAction === "resize-nw") {
         const newX = Math.max(0, Math.min(x + width - 5, x + deltaX));
         const newY = Math.max(0, Math.min(y + height - 5, y + deltaY));
@@ -154,10 +162,23 @@ const CropPdf = () => {
         height += y - newY;
         x = newX;
         y = newY;
+        sizeChanged = true;
       }
-      // Add other corners if needed, keeping simple for now
 
-      return { x, y, width, height };
+      const newBoxes = { ...prev };
+      
+      if (sizeChanged) {
+        Object.keys(newBoxes).forEach((key) => {
+          newBoxes[key] = {
+            ...newBoxes[key],
+            width,
+            height,
+          };
+        });
+      }
+
+      newBoxes[pageNumber] = { x, y, width, height };
+      return newBoxes;
     });
   };
 
@@ -174,21 +195,20 @@ const CropPdf = () => {
       const pdfDoc = await PDFDocument.load(fileBuffer);
       const pages = pdfDoc.getPages();
 
-      const margins = getMargins();
-
-      pages.forEach((page) => {
+      pages.forEach((page, index) => {
+        const pageNum = index + 1;
         const { width, height } = page.getSize();
 
-        // pdf-lib coordinates (bottom-left origin)
-        // x = left
-        // y = bottom (margin)
-        // w = width - left - right
-        // h = height - top - bottom
+        let box = cropBoxes[pageNum];
+        if (!box) {
+          const baseBox = cropBoxes[1] || { x: 10, y: 10, width: 80, height: 80 };
+          box = { x: 10, y: 10, width: baseBox.width, height: baseBox.height };
+        }
 
-        const cropX = margins.left;
-        const cropY = margins.bottom;
-        const cropW = width - margins.left - margins.right;
-        const cropH = height - margins.top - margins.bottom;
+        const cropX = (box.x / 100) * width;
+        const cropY = height - ((box.y + box.height) / 100) * height; // bottom-left origin in pdf-lib
+        const cropW = (box.width / 100) * width;
+        const cropH = (box.height / 100) * height;
 
         if (cropW > 0 && cropH > 0) {
           page.setCropBox(cropX, cropY, cropW, cropH);
@@ -347,10 +367,10 @@ const CropPdf = () => {
                         className="crop-box"
                         style={{
                           position: "absolute",
-                          left: `${cropBox.x}%`,
-                          top: `${cropBox.y}%`,
-                          width: `${cropBox.width}%`,
-                          height: `${cropBox.height}%`,
+                          left: `${getCurrentCropBox().x}%`,
+                          top: `${getCurrentCropBox().y}%`,
+                          width: `${getCurrentCropBox().width}%`,
+                          height: `${getCurrentCropBox().height}%`,
                           border: "2px solid var(--accent-color)",
                           boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.5)",
                           pointerEvents: "all",

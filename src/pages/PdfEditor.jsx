@@ -181,7 +181,7 @@ const PdfEditor = () => {
 
     // Convert
     {
-      title: "PDF Converter",
+      title: "PDF To Text Converter",
       icon: FileType,
       path: "/pdf-editor/converter",
       color: "#FF9800",
