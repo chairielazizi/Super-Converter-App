@@ -11,6 +11,13 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { pdfjs } from "react-pdf";
+import {
+  convertPdfToDocx,
+  convertPdfToPptx,
+  convertPdfToXlsx,
+  convertDocxToPdf,
+  convertPdfToJpg
+} from "../utils/documentConverter";
 
 const Converter = () => {
   const [file, setFile] = useState(null);
@@ -18,6 +25,7 @@ const Converter = () => {
   const [status, setStatus] = useState("idle"); // idle, converting, done
   const [progress, setProgress] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [convertedBlob, setConvertedBlob] = useState(null);
   
   const dropdownRef = useRef(null);
 
@@ -41,73 +49,55 @@ const Converter = () => {
 
   const handleFileSelected = (files) => {
     if (files.length > 0) {
-      setFile(files[0]);
+      const selected = files[0];
+      if (selected.size > 20 * 1024 * 1024) {
+        alert("File size exceeds the 20MB limit for client-side conversion.");
+        return;
+      }
+      setFile(selected);
       setStatus("idle");
       setProgress(0);
+      setConvertedBlob(null);
     }
   };
 
-  const startConversion = () => {
+  const startConversion = async () => {
     if (!file) return;
     setStatus("converting");
-    setProgress(0);
+    setProgress(30);
 
-    // Mock conversion progress
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setStatus("done");
-          return 100;
+    try {
+      let blob = null;
+      if (file.type === "application/pdf") {
+        if (targetFormat === "docx") blob = await convertPdfToDocx(file);
+        else if (targetFormat === "pptx") blob = await convertPdfToPptx(file);
+        else if (targetFormat === "xlsx") blob = await convertPdfToXlsx(file);
+        else if (targetFormat === "jpg") blob = await convertPdfToJpg(file);
+        else if (targetFormat === "pdf") blob = file; // No conversion
+      } else if (file.name.match(/\.docx$/i) || file.type.includes("wordprocessingml")) {
+        if (targetFormat === "pdf") blob = await convertDocxToPdf(file);
+        else {
+           alert(`Conversion from DOCX to ${targetFormat.toUpperCase()} is not implemented natively yet. You will receive a dummy file.`);
+           blob = file;
         }
-        return prev + 10;
-      });
-    }, 300);
+      } else {
+        alert("This specific conversion path is not fully implemented natively yet. You will receive a dummy file.");
+        blob = file;
+      }
+
+      setConvertedBlob(blob);
+      setProgress(100);
+      setStatus("done");
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred during conversion.");
+      setStatus("idle");
+    }
   };
 
-  const handleDownload = async () => {
-    if (!file) return;
-
-    if (targetFormat === "jpg" && file.type === "application/pdf") {
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 2.0 });
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        await page.render({ canvasContext: context, viewport }).promise;
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-
-        const a = document.createElement("a");
-        a.href = dataUrl;
-        a.download = `${file.name.split('.')[0]}_converted.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      } catch (err) {
-        console.error("Error converting to JPG:", err);
-        alert("Failed to convert PDF to JPG.");
-      }
-      return;
-    }
-
-    if (["docx", "xlsx", "pptx"].includes(targetFormat)) {
-      alert(
-        "Notice: True conversion to Office formats (Word, Excel, PowerPoint) requires a backend server or external API. \n\nAs this app currently runs entirely in the browser, downloading this file will simply yield a renamed dummy file, which is why your OS cannot open it correctly."
-      );
-    }
-    
-    if (targetFormat === "pdf" && file.name.match(/\.(docx|pptx|xlsx)$/i)) {
-      alert(
-        "Notice: True conversion from Office formats to PDF requires a backend server. Downloading this will yield a renamed file."
-      );
-    }
-
-    const url = URL.createObjectURL(file);
+  const handleDownload = () => {
+    if (!convertedBlob) return;
+    const url = URL.createObjectURL(convertedBlob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `${file.name.split('.')[0]}_converted.${targetFormat}`;

@@ -27,6 +27,9 @@ const VideoDownloader = () => {
   };
 
   const handleDownload = () => {
+    alert(
+      "Notice: True video downloading requires a backend server or a proxy API to fetch video streams and bypass cross-origin restrictions (CORS).\n\nAs this app runs entirely in the browser, this is just a frontend UI demonstration."
+    );
     setStatus("downloading");
     // Simulate download
     setTimeout(() => {
