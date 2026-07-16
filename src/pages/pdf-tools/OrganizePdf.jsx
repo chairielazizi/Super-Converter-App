@@ -12,6 +12,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
 import { getTimestampedFilename } from "../../utils/fileUtils";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 const OrganizePdf = () => {
   const navigate = useNavigate();
@@ -202,33 +210,46 @@ const OrganizePdf = () => {
                   <span>Drag and drop pages to reorder them</span>
                 </div>
 
-                <div className="pages-list">
-                  {pages.map((page, index) => (
-                    <div
-                      key={`${page.originalIndex}-${index}`}
-                      className={`page-item ${
-                        draggedIndex === index ? "dragging" : ""
-                      }`}
-                      draggable
-                      onDragStart={() => handleDragStart(index)}
-                      onDragOver={handleDragOver}
-                      onDrop={() => handleDrop(index)}
-                    >
-                      <div className="drag-handle">
-                        <GripVertical size={20} />
-                      </div>
-                      <div className="page-info">
-                        <div className="page-badge">Page {page.pageNumber}</div>
-                        <div className="page-position">
-                          Position: {index + 1}
+                <Document file={file} className="pdf-document-list">
+                  <div className="pages-list">
+                    {pages.map((page, index) => (
+                      <div
+                        key={`${page.originalIndex}-${index}`}
+                        className={`page-item ${
+                          draggedIndex === index ? "dragging" : ""
+                        }`}
+                        draggable
+                        onDragStart={() => handleDragStart(index)}
+                        onDragOver={handleDragOver}
+                        onDrop={() => handleDrop(index)}
+                      >
+                        <div className="drag-handle">
+                          <GripVertical size={20} />
                         </div>
+                        
+                        <div className="page-preview-list-wrapper">
+                          <Page 
+                            pageNumber={page.pageNumber} 
+                            width={60} 
+                            renderTextLayer={false} 
+                            renderAnnotationLayer={false} 
+                            className="mini-pdf-page-list"
+                          />
+                        </div>
+
+                        <div className="page-info">
+                          <div className="page-badge">Page {page.pageNumber}</div>
+                          <div className="page-position">
+                            Position: {index + 1}
+                          </div>
+                        </div>
+                        {page.originalIndex !== index && (
+                          <div className="moved-indicator">Moved</div>
+                        )}
                       </div>
-                      {page.originalIndex !== index && (
-                        <div className="moved-indicator">Moved</div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </Document>
 
                 <button
                   className="btn-organize"
@@ -548,6 +569,21 @@ const OrganizePdf = () => {
           color: #666;
           display: flex;
           align-items: center;
+        }
+
+        .page-preview-list-wrapper {
+          background: #1a1a1a;
+          border: 1px solid #444;
+          border-radius: 4px;
+          overflow: hidden;
+          padding: 2px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .mini-pdf-page-list canvas {
+          border-radius: 2px;
         }
 
         .page-info {

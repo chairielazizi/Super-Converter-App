@@ -23,9 +23,7 @@ import {
   WatermarkPdf,
   PdfFormFiller,
   SharePdf,
-  EditPdf,
   PdfConverter,
-  SignPdf,
   UnlockPdf,
   ProtectPdf,
   FlattenPdf,
@@ -57,9 +55,7 @@ function App() {
           <Route path="pdf-editor/watermark" element={<WatermarkPdf />} />
           <Route path="pdf-editor/form-filler" element={<PdfFormFiller />} />
           <Route path="pdf-editor/share" element={<SharePdf />} />
-          <Route path="pdf-editor/edit" element={<EditPdf />} />
           <Route path="pdf-editor/converter" element={<PdfConverter />} />
-          <Route path="pdf-editor/sign" element={<SignPdf />} />
           <Route path="pdf-editor/unlock" element={<UnlockPdf />} />
           <Route path="pdf-editor/protect" element={<ProtectPdf />} />
           <Route path="pdf-editor/flatten" element={<FlattenPdf />} />

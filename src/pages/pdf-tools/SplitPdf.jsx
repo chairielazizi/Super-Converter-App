@@ -6,6 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
 import { Capacitor } from "@capacitor/core";
 import { getTimestampedFilename } from "../../utils/fileUtils";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 const SplitPdf = () => {
   const navigate = useNavigate();
@@ -120,17 +128,24 @@ const SplitPdf = () => {
                   </p>
                 </div>
 
-                <div className="cards-container">
-                  {splitPages.map((page) => (
-                    <div key={page.pageNum} className="page-card">
-                      <div className="page-info">
-                        <div className="page-icon">
-                          <span className="page-number">{page.pageNum}</span>
+                <Document file={file} className="pdf-document-grid">
+                  <div className="cards-container">
+                    {splitPages.map((page) => (
+                      <div key={page.pageNum} className="page-card">
+                        <div className="page-preview-wrapper">
+                          <Page 
+                            pageNumber={page.pageNum} 
+                            width={120} 
+                            renderTextLayer={false} 
+                            renderAnnotationLayer={false} 
+                            className="mini-pdf-page"
+                          />
                         </div>
-                        <span className="page-label">Page {page.pageNum}</span>
-                      </div>
+                        <div className="page-info" style={{marginTop: "8px", marginBottom: "8px"}}>
+                          <span className="page-label" style={{fontWeight: "bold", color: "#fff"}}>Page {page.pageNum}</span>
+                        </div>
 
-                      <div className="card-actions">
+                        <div className="card-actions">
                         {page.url && (
                           <button
                             className="btn-preview-card"
@@ -170,10 +185,11 @@ const SplitPdf = () => {
                             <Download size={14} /> Download
                           </button>
                         )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </Document>
 
                 <button
                   className="btn-secondary"
@@ -380,15 +396,23 @@ const SplitPdf = () => {
           gap: 8px;
         }
         
-        .page-icon {
-          width: 40px;
-          height: 50px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          border-radius: 4px;
+        .page-preview-wrapper {
+          flex: 1;
           display: flex;
           align-items: center;
           justify-content: center;
+          width: 100%;
+          overflow: hidden;
+          background: #1a1a1a;
+          border-radius: 4px;
+          padding: 5px;
+          min-height: 160px;
+        }
+        
+        .mini-pdf-page canvas {
+          max-width: 100% !important;
+          height: auto !important;
+          border-radius: 2px;
         }
         
         .page-number {

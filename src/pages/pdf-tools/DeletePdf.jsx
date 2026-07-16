@@ -12,6 +12,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import { downloadPdf } from "../../utils/downloadHelper";
 import { getTimestampedFilename } from "../../utils/fileUtils";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 const DeletePdf = () => {
   const navigate = useNavigate();
@@ -175,26 +183,37 @@ const DeletePdf = () => {
                   </div>
                 </div>
 
-                <div className="pages-grid">
-                  {pages.map((page) => (
-                    <div
-                      key={page.index}
-                      className={`page-card ${
-                        selectedPages.has(page.index) ? "selected" : ""
-                      }`}
-                      onClick={() => togglePageSelection(page.index)}
-                    >
-                      <div className="page-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={selectedPages.has(page.index)}
-                          onChange={() => {}}
-                        />
+                <Document file={file} className="pdf-document-grid">
+                  <div className="pages-grid">
+                    {pages.map((page) => (
+                      <div
+                        key={page.index}
+                        className={`page-card ${
+                          selectedPages.has(page.index) ? "selected" : ""
+                        }`}
+                        onClick={() => togglePageSelection(page.index)}
+                      >
+                        <div className="page-preview-wrapper">
+                          <Page 
+                            pageNumber={page.pageNumber} 
+                            width={120} 
+                            renderTextLayer={false} 
+                            renderAnnotationLayer={false} 
+                            className="mini-pdf-page"
+                          />
+                        </div>
+                        <div className="page-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={selectedPages.has(page.index)}
+                            onChange={() => {}}
+                          />
+                        </div>
+                        <div className="page-number">Page {page.pageNumber}</div>
                       </div>
-                      <div className="page-number">Page {page.pageNumber}</div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </Document>
 
                 <button
                   className="btn-delete"
@@ -469,7 +488,7 @@ const DeletePdf = () => {
         .pages-grid {
           margin-top: 20px;
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
           gap: 16px;
         }
 
@@ -477,14 +496,34 @@ const DeletePdf = () => {
           background: var(--surface-color);
           border: 2px solid #333;
           border-radius: 8px;
-          padding: 16px;
+          padding: 12px;
           cursor: pointer;
           transition: all 0.3s ease;
           position: relative;
-          aspect-ratio: 0.7;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          min-height: 200px;
+        }
+
+        .page-preview-wrapper {
+          flex: 1;
           display: flex;
           align-items: center;
           justify-content: center;
+          width: 100%;
+          overflow: hidden;
+          background: #1a1a1a;
+          border-radius: 4px;
+          padding: 5px;
+        }
+        
+        .mini-pdf-page canvas {
+          max-width: 100% !important;
+          height: auto !important;
+          border-radius: 2px;
         }
 
         .page-card:hover {
