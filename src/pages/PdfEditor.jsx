@@ -131,14 +131,8 @@ const PdfEditor = () => {
 
     // View & Edit
     {
-      title: "Edit PDF",
+      title: "Visual PDF Editor",
       icon: Edit3,
-      path: "/pdf-editor/edit",
-      color: "#00BCD4",
-    },
-    {
-      title: "PDF Annotator",
-      icon: PenTool,
       path: "/pdf-editor/annotate",
       color: "#00BCD4",
     },
@@ -199,13 +193,7 @@ const PdfEditor = () => {
       color: "#FF9800",
     },
 
-    // Sign
-    {
-      title: "Sign PDF",
-      icon: Edit3,
-      path: "/pdf-editor/sign",
-      color: "#E91E63",
-    },
+    // Security & Advanced
     {
       title: "Unlock PDF",
       icon: Unlock,
