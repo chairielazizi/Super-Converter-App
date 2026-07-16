@@ -82,144 +82,52 @@ const PdfToolCard = ({
 const PdfEditor = () => {
   const navigate = useNavigate();
 
-  const tools = [
-    // Compress
+  const toolGroups = [
     {
-      title: "Compress PDF",
-      icon: Minimize2,
-      path: "/pdf-editor/compress",
-      color: "#FF4081",
+      groupName: "Edit & View",
+      color: "#00BCD4",
+      tools: [
+        { title: "Visual PDF Editor", icon: Edit3, path: "/pdf-editor/annotate", color: "#00BCD4" },
+        { title: "PDF Reader", icon: Eye, path: "/pdf-editor/reader", color: "#00BCD4" },
+        { title: "PDF Form Filler", icon: FolderEdit, path: "/pdf-editor/form-filler", color: "#00BCD4" },
+        { title: "Redact PDF", icon: EyeOff, path: "/pdf-editor/redact", color: "#00BCD4" },
+        { title: "Watermark PDF", icon: Droplet, path: "/pdf-editor/watermark", color: "#00BCD4" },
+        { title: "Number Pages", icon: Hash, path: "/pdf-editor/number-pages", color: "#00BCD4" },
+        { title: "Crop PDF", icon: Crop, path: "/pdf-editor/crop", color: "#00BCD4" },
+      ]
     },
-
-    // Organize
     {
-      title: "Merge PDF",
-      icon: Layers,
-      path: "/pdf-editor/merge",
+      groupName: "Organize",
       color: "#9C27B0",
+      tools: [
+        { title: "Merge PDF", icon: Layers, path: "/pdf-editor/merge", color: "#9C27B0" },
+        { title: "Split PDF", icon: Split, path: "/pdf-editor/split", color: "#9C27B0" },
+        { title: "Rotate PDF", icon: RotateCw, path: "/pdf-editor/rotate", color: "#9C27B0" },
+        { title: "Delete Pages", icon: Trash2, path: "/pdf-editor/delete-pages", color: "#9C27B0" },
+        { title: "Extract Pages", icon: FileOutput, path: "/pdf-editor/extract", color: "#9C27B0" },
+        { title: "Organize PDF", icon: FolderOpen, path: "/pdf-editor/organize", color: "#9C27B0" },
+      ]
     },
     {
-      title: "Split PDF",
-      icon: Split,
-      path: "/pdf-editor/split",
-      color: "#9C27B0",
-    },
-    {
-      title: "Rotate PDF",
-      icon: RotateCw,
-      path: "/pdf-editor/rotate",
-      color: "#9C27B0",
-    },
-    {
-      title: "Delete Pages",
-      icon: Trash2,
-      path: "/pdf-editor/delete-pages",
-      color: "#9C27B0",
-    },
-    {
-      title: "Extract Pages",
-      icon: FileOutput,
-      path: "/pdf-editor/extract",
-      color: "#9C27B0",
-    },
-    {
-      title: "Organize PDF",
-      icon: FolderOpen,
-      path: "/pdf-editor/organize",
-      color: "#9C27B0",
-    },
-
-    // View & Edit
-    {
-      title: "Visual PDF Editor",
-      icon: Edit3,
-      path: "/pdf-editor/annotate",
-      color: "#00BCD4",
-    },
-    {
-      title: "PDF Reader",
-      icon: Eye,
-      path: "/pdf-editor/reader",
-      color: "#00BCD4",
-    },
-    {
-      title: "Number Pages",
-      icon: Hash,
-      path: "/pdf-editor/number-pages",
-      color: "#00BCD4",
-    },
-    {
-      title: "Crop PDF",
-      icon: Crop,
-      path: "/pdf-editor/crop",
-      color: "#00BCD4",
-    },
-    {
-      title: "Redact PDF",
-      icon: EyeOff,
-      path: "/pdf-editor/redact",
-      color: "#00BCD4",
-    },
-    {
-      title: "Watermark PDF",
-      icon: Droplet,
-      path: "/pdf-editor/watermark",
-      color: "#00BCD4",
-    },
-    {
-      title: "PDF Form Filler",
-      icon: FolderEdit,
-      path: "/pdf-editor/form-filler",
-      color: "#00BCD4",
-    },
-    {
-      title: "Share PDF",
-      icon: Share2,
-      path: "/pdf-editor/share",
-      color: "#00BCD4",
-    },
-
-    // Convert
-    {
-      title: "PDF To Text Converter",
-      icon: FileType,
-      path: "/pdf-editor/converter",
+      groupName: "Convert & Compress",
       color: "#FF9800",
+      tools: [
+        { title: "Compress PDF", icon: Minimize2, path: "/pdf-editor/compress", color: "#FF9800" },
+        { title: "PDF To Text Converter", icon: FileType, path: "/pdf-editor/converter", color: "#FF9800" },
+        { title: "Image to PDF", icon: ImageIcon, path: "/pdf-editor/image-to-pdf", color: "#FF9800" },
+      ]
     },
     {
-      title: "Image to PDF",
-      icon: ImageIcon,
-      path: "/pdf-editor/image-to-pdf",
-      color: "#FF9800",
-    },
-
-    // Security & Advanced
-    {
-      title: "Unlock PDF",
-      icon: Unlock,
-      path: "/pdf-editor/unlock",
+      groupName: "Security & Advanced",
       color: "#E91E63",
-    },
-    {
-      title: "Protect PDF",
-      icon: Shield,
-      path: "/pdf-editor/protect",
-      color: "#E91E63",
-    },
-    {
-      title: "Flatten PDF",
-      icon: FileDown,
-      path: "/pdf-editor/flatten",
-      color: "#E91E63",
-    },
-
-    // Scan
-    {
-      title: "PDF Scanner",
-      icon: Camera,
-      path: "/pdf-editor/scanner",
-      color: "#3F51B5",
-    },
+      tools: [
+        { title: "Unlock PDF", icon: Unlock, path: "/pdf-editor/unlock", color: "#E91E63" },
+        { title: "Protect PDF", icon: Shield, path: "/pdf-editor/protect", color: "#E91E63" },
+        { title: "Flatten PDF", icon: FileDown, path: "/pdf-editor/flatten", color: "#E91E63" },
+        { title: "PDF Scanner", icon: Camera, path: "/pdf-editor/scanner", color: "#E91E63" },
+        { title: "Share PDF", icon: Share2, path: "/pdf-editor/share", color: "#E91E63" },
+      ]
+    }
   ];
 
   return (
@@ -229,25 +137,50 @@ const PdfEditor = () => {
         <p style={{ color: "#888" }}>Choose a tool to get started</p>
       </header>
 
-      <div className="pdf-tools-grid">
-        {tools.map((tool, idx) => (
-          <PdfToolCard
-            key={idx}
-            title={tool.title}
-            icon={tool.icon}
-            color={tool.color}
-            onClick={() => navigate(tool.path)}
-          />
+      <div className="pdf-tools-container">
+        {toolGroups.map((group, gIdx) => (
+          <div key={gIdx} className="tool-group">
+            <h3 className="group-title" style={{ color: group.color, borderLeftColor: group.color }}>
+              {group.groupName}
+            </h3>
+            <div className="pdf-tools-grid">
+              {group.tools.map((tool, idx) => (
+                <PdfToolCard
+                  key={idx}
+                  title={tool.title}
+                  icon={tool.icon}
+                  color={tool.color}
+                  onClick={() => navigate(tool.path)}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
       <style>{`
+        .pdf-tools-container {
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        .tool-group {
+          margin-bottom: 40px;
+        }
+
+        .group-title {
+          font-size: 1.2rem;
+          margin-bottom: 20px;
+          padding-left: 12px;
+          border-left: 4px solid;
+          text-align: left;
+          opacity: 0.9;
+        }
+
         .pdf-tools-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
           gap: 16px;
-          max-width: 1000px;
-          margin: 0 auto;
         }
 
         @media (max-width: 640px) {

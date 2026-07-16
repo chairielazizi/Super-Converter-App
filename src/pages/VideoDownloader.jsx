@@ -36,7 +36,7 @@ const VideoDownloader = () => {
 
   return (
     <div className="page-container">
-      <header style={{ marginBottom: "30px" }}>
+      <header style={{ marginBottom: "30px", textAlign: "center" }}>
         <h2 className="neon-text">Video Downloader</h2>
         <p style={{ color: "#888" }}>
           Download videos from supported websites.
