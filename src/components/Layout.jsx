@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Home, FileText, RefreshCw, Download, ArrowLeft } from "lucide-react";
+import { Home, FileText, RefreshCw, Youtube, ArrowLeft } from "lucide-react";
 
 const Layout = () => {
   const location = useLocation();
@@ -54,13 +54,13 @@ const Layout = () => {
           <span>Convert</span>
         </NavLink>
         <NavLink
-          to="/video-downloader"
+          to="/video-converter"
           className={({ isActive }) =>
             isActive ? "nav-item active" : "nav-item"
           }
         >
-          <Download size={24} />
-          <span>Video</span>
+          <Youtube size={24} />
+          <span>Video Converter</span>
         </NavLink>
       </nav>
 

@@ -4,7 +4,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import PdfEditor from "./pages/PdfEditor";
 import Converter from "./pages/Converter";
-import VideoDownloader from "./pages/VideoDownloader";
+import VideoConverter from "./pages/VideoConverter";
 
 // PDF Tools
 import {
@@ -63,7 +63,7 @@ function App() {
           <Route path="pdf-editor/image-to-pdf" element={<ImageToPdf />} />
 
           <Route path="converter" element={<Converter />} />
-          <Route path="video-downloader" element={<VideoDownloader />} />
+          <Route path="video-converter" element={<VideoConverter />} />
         </Route>
       </Routes>
     </BrowserRouter>

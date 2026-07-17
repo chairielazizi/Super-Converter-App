@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FileText, RefreshCw, Download, ArrowRight } from "lucide-react";
+import { FileText, RefreshCw, Youtube, ArrowRight } from "lucide-react";
 
 const ToolCard = ({ title, description, icon: Icon, to, color }) => (
   <Link to={to} className="tool-card">
@@ -107,10 +107,10 @@ const Home = () => {
         />
 
         <ToolCard
-          title="Video Downloader"
-          description="Download videos from supported sites."
-          icon={Download}
-          to="/video-downloader"
+          title="Video Converter"
+          description="Convert, extract audio, and compress videos."
+          icon={Youtube}
+          to="/video-converter"
           color="#E040FB"
         />
       </div>
